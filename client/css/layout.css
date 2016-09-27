@@ -1,0 +1,42 @@
+/*basic layout of site *************************/
+@media (min-width:544px) {
+    #wrapper {
+        background-color: blue;
+        overflow: hidden;
+    }
+
+    #footer {
+        background-color: brown;
+        clear: both;
+    }
+
+    #events {
+        float:left;
+        width: 30%;
+        min-height: 78vh;
+        background-color: green;
+    }
+
+    #main {
+        float:left;
+        background-color: red;
+        width:70%;
+        min-height: 78vh;
+    }
+}
+
+@media (max-width:543px) {
+    #footer {
+        display:none;
+    }
+    #events {
+        display:none;
+    }
+    #main {
+        background-color: red;
+    }
+}
+
+
+
+/*end basic layout of site *************************/
