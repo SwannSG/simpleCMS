@@ -1,0 +1,18 @@
+{
+  "name": "simple_cms",
+  "version": "1.0.0",
+  "description": "Simple CMS sytem for Yoga site",
+  "main": "index.js",
+  "dependencies": {
+    "express": "^4.14.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.10.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js"
+  },
+  "author": "",
+  "license": "ISC"
+}

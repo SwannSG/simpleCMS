@@ -1,0 +1,116 @@
+/*navbar styling ***************************************************/
+.navbar {
+    height: 16vh;
+    display: flex;
+    flex-flow: row;
+    justify-content: flex-start;
+    align-items: center;
+    background: linear-gradient(to right, hsl(203, 100%, 50%) , hsl(0, 6%, 88%));
+
+}
+
+.navbar h1 {
+    color: hsl(166, 100%, 50%);
+    text-shadow: 0 -.05em .05em rgba(0,0,0,.5);
+    display:inline-block;;
+    padding: 2vw;
+    margin-bottom: 5px;
+    transform: rotate(-12deg) skew(10deg);
+}
+
+.navbar ul {
+    display: inline-block;
+    list-style: none;
+    margin-botttom: 5px;
+}
+
+.navbar li {
+    display: inline-block;
+    margin-left:1vw;
+}
+
+.navbar a {
+    border-radius: 5px;
+    box-shadow: 0 .05em .25em rgba(0,0,0,.5);
+    border: 1px solid rgba(0,0,0,.1);
+    text-shadow: 0 -.05em .05em rgba(0,0,0,.5);
+    color: hsla(360, 100%, 100%, 1);
+    padding: 0.3em 0.5em;
+    line-height: 1.5;
+    background: hsla(204,65%,65%,0.6) linear-gradient(hsla(0,0%,100%,.2),transparent);
+    text-decoration: none;
+}
+
+.navbar button {
+    padding: 0.3em 0.5em;
+    border-radius: 5px;
+    background-color: hsla(360, 100%, 100%, 1);
+    display: none;
+}
+
+@media (max-width:543px) {
+    .navbar {
+        justify-content: space-between;
+    }
+    .navbar ul {
+        display: none;
+    }
+
+    .navbar button {
+        display: inline;
+        margin-right: 2vw;
+    }
+}
+
+/* end navbar styling **********************************************/
+
+/* outside-navbar styling ********************************/
+
+@media (min-width:544px) {
+    .outside-navbar {
+        display: none;
+    }
+}
+
+@media (max-width:543px) {
+    .outside-navbar {
+        display: none;
+    }
+    .outside-navbar-show {
+        display: block;
+    }
+}
+
+.outside-navbar {
+    margin-top:0.5em;
+    width: 30vw;
+    margin-left: 70vw;
+    background-color: lightblue;
+    position: relative;
+    bottom: 5vh;
+    border-radius: 5px;
+    box-shadow: 0 .05em .25em rgba(0,0,0,.5);
+    border: 1px solid rgba(0,0,0,.1);
+    text-shadow: 0 -.05em .05em rgba(0,0,0,.5);
+    line-height: 1.5;
+    padding-left: 0.5em;
+}
+
+.outside-navbar ul {
+    list-style: none;
+}
+
+.outside-navbar li:hover {
+    background-color: lightgray;
+}
+
+.outside-navbar a {
+    /*width: 100%;*/
+    /*padding-left: 40vw;*/
+    text-decoration: none;
+    color: #050505;
+    display: block;
+    /*border-bottom:  1px solid black;*/
+}
+
+/* end outside-navbar styling *********************************************/
