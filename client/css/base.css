@@ -2,7 +2,7 @@
 * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
+    box-sizing: inherit;
 }
 /* end potent global reset*/
 
@@ -12,6 +12,7 @@ body {
     font-family: 'Ubuntu', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 16px;
     color: #050505;
+    box-sizing: border-box;
 }
 
 /*printer*/

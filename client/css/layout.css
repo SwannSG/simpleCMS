@@ -8,20 +8,21 @@
     #footer {
         background-color: brown;
         clear: both;
+        margin: 0.5em;
     }
 
     #events {
         float:left;
-        width: 30%;
-        min-height: 78vh;
+        width: calc(30% - 1em);
         background-color: green;
+        margin: 0.5em;
     }
 
     #main {
         float:left;
         background-color: red;
-        width:70%;
-        min-height: 78vh;
+        width: calc(70% - 1em);
+        margin: 0.5em;
     }
 }
 
