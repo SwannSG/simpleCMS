@@ -1,6 +1,8 @@
 const express = require('express');
 const app = express();
 
+const bodyParser = require('body-parser')
+app.use(bodyParser.json());
 
 
 app.listen(3000, function() {
@@ -23,6 +25,21 @@ app.get('/home', (req, res) => {
     console.log('home');
     res.sendFile(__dirname + '/index.html');
 });
+
+app.get('/postJSON', (req, res) => {
+    console.log('get postJSON');
+    res.sendFile(__dirname + '/client/html/mgmt/postJSON.html');
+})
+
+app.post('/rest/jsonData', (req, res) => {
+    console.log('post JSON data');
+    // bodyParser handles this in req.body and returns js object
+    console.log(req.body)   // js object
+    jsObj = req.body
+    res.send(jsObj);
+});
+
+
 
 app.get('/readwritewp', (req, res) => {
     // read, write with promises
@@ -121,7 +138,7 @@ app.get('/readwritewp', (req, res) => {
         .then(pathExist)            // check file_out path exists
         .then(readFile)             // read file-in to eof
         .then(writeFile)            // write to file_out
-        .then((x) => {res.send(x);})
+        .then((x) => {res.send(x);})// shows success of chain of operations
         .catch((err) => {res.send(err);});
 
 });
