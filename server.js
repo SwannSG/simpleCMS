@@ -32,19 +32,31 @@ app.get('/uploadfile',function(req,res){
     res.sendFile(__dirname + "/client/html/mgmt/uploadFile.html");
 });
 
+app.get('/uploadfile1',function(req,res){
+    console.log('get /uploadfile1');
+    res.sendFile(__dirname + "/client/html/mgmt/uploadFile1.html");
+});
 
+var storage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        cb(null, './uploads/');
+    },
+    filename: function(req, file, cb) {
+        cb(null, file.originalname);
+    }
+});
 
-app.post('/uploadfile', function(req, res){
+//multer({ destination: './uploads/'})
+app.post('/uploadfile', multer({storage: storage}).single('upl'), function(req, res, next){
     console.log('post /uploadfile');
-    multer({ dest: './uploads/'})
-    console.log(req.files);
+
     console.log(req.file);
-    console.log('aaaaaaaaaa');
+    res.send('Done');
     // upload(req,res,function(err) {
     //     if(err) {
     //         return res.end("Error uploading file.");
     //     }
-    //     res.end("File is uploaded");
+    //     res.send("File is uploaded");
     // });
 });
 
