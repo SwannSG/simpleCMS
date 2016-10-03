@@ -28,6 +28,7 @@ app.get('/readwritewp', (req, res) => {
     // read, write with promises
     console.log('/readwritewp');
 
+
     var file_in = __dirname + '/md/testFile.html';
     var file_out = __dirname + '/md/testFileOut.html';
 
@@ -35,7 +36,7 @@ app.get('/readwritewp', (req, res) => {
     var fs = require('fs');
 
     var fileExist = (file_in, file_out) => {
-        console.log('fileExist');
+        // does file_in exist ?
         if (!file_in || !file_out) {
             return new Promise((resolve, reject) => {
                 reject('function fileExist: invalid parmaeters');
@@ -55,8 +56,7 @@ app.get('/readwritewp', (req, res) => {
 
 
     var pathExist = (x) => {
-        console.log('pathExist');
-        console.log(x);
+        // does file_out path exist
         return new Promise( (resolve, reject) => {
             fs.access(require('path').dirname(file_out), function(err) {
                 if (err) {
@@ -69,8 +69,9 @@ app.get('/readwritewp', (req, res) => {
         });
     };
 
-    var readAndWrite = (x) => {
-        console.log('readAndWrite');
+    var readFile = (x) => {
+        // read and process file_in
+
         // create readstream(physicalFileLocation)
         var fp = fs.createReadStream(x.file_in);
 
@@ -89,33 +90,38 @@ app.get('/readwritewp', (req, res) => {
             }
         });
 
-        rl.on('close', function() {
-            console.log('close');
-            return new Promise( (resolve, reject) => {
-                resolve('ok');
+        var promise = new Promise((resolve, reject) => {
+            // if file_in takes too long to read we generate an error
+            var timer = setTimeout( () =>{
+                reject('function readFile: taking too long to read file ' + x.file_in);
+            },1000)
 
-                // fs.writeFile(x.file_out, textOut, function(err) {
-                //     if (err) {
-                //         console.log('error');
-                //         reject('function readAndWrite: ' + err.code);
-                //     }
-                //     else {
-                //         console.log('ok');
-                //         x.result = 'ok'
-                //         resolve(x);
-                //     }
-                // })
+            // rl.on event is triggered when file_in eof reached
+            rl.on('close', () => {
+                // file_in read ok
+                clearTimeout(timer);
+                x.textOut = textOut;
+                resolve(x)
+            });
+        });
+        return promise;
+    }
 
-
+    var writeFile = (x) => {
+        // write to file_out
+        return new Promise((resolve, reject) => {
+            fs.writeFile(x.file_out, x.textOut, (err) => {
+                if (err) reject('function writeFile: error writing to ' + x.file_out);
+                resolve('success');
             });
         });
     }
 
-
-    fileExist(file_in, file_out)
-        .then(pathExist)
-        .then(readAndWrite)
-        .then((x) => {console.log(x); res.send(x);})
+    fileExist(file_in, file_out)    // check file_in exists
+        .then(pathExist)            // check file_out path exists
+        .then(readFile)             // read file-in to eof
+        .then(writeFile)            // write to file_out
+        .then((x) => {res.send(x);})
         .catch((err) => {res.send(err);});
 
 });
