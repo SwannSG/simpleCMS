@@ -4,7 +4,9 @@
   "description": "Simple CMS sytem for Yoga site",
   "main": "index.js",
   "dependencies": {
-    "express": "^4.14.0"
+    "express": "^4.14.0",
+    "google-auth-library": "^0.9.8",
+    "googleapis": "^13.0.0"
   },
   "devDependencies": {
     "nodemon": "^1.10.2"
