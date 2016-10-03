@@ -2,8 +2,9 @@ const express = require('express');
 const app = express();
 
 const bodyParser = require('body-parser')
-app.use(bodyParser.json());
+const multer  =   require('multer');
 
+app.use(bodyParser.json());
 
 app.listen(3000, function() {
   console.log('listening on 3000')
@@ -26,6 +27,32 @@ app.get('/home', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
 
+app.get('/uploadfile',function(req,res){
+    console.log('get /uploadfile');
+    res.sendFile(__dirname + "/client/html/mgmt/uploadFile.html");
+});
+
+
+
+app.post('/uploadfile', function(req, res){
+    console.log('post /uploadfile');
+    multer({ dest: './uploads/'})
+    console.log(req.files);
+    console.log(req.file);
+    console.log('aaaaaaaaaa');
+    // upload(req,res,function(err) {
+    //     if(err) {
+    //         return res.end("Error uploading file.");
+    //     }
+    //     res.end("File is uploaded");
+    // });
+});
+
+
+
+
+
+
 app.get('/postJSON', (req, res) => {
     console.log('get postJSON');
     res.sendFile(__dirname + '/client/html/mgmt/postJSON.html');
@@ -38,6 +65,9 @@ app.post('/rest/jsonData', (req, res) => {
     jsObj = req.body
     res.send(jsObj);
 });
+
+
+
 
 
 
