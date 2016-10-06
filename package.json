@@ -9,7 +9,9 @@
     "express": "^4.14.0",
     "google-auth-library": "^0.9.8",
     "googleapis": "^13.0.0",
-    "multer": "^1.2.0"
+    "marked": "^0.3.6",
+    "multer": "^1.2.0",
+    "pygmentize-bundled": "^2.3.0"
   },
   "devDependencies": {
     "nodemon": "^1.10.2"

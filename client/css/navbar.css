@@ -1,15 +1,14 @@
 /*navbar styling ***************************************************/
-.navbar {
+.admin-navbar, .navbar {
     height: 16vh;
     display: flex;
     flex-flow: row;
     justify-content: flex-start;
     align-items: center;
     background: linear-gradient(to right, hsl(203, 100%, 50%) , hsl(0, 6%, 88%));
-
 }
 
-.navbar h1 {
+.admin-navbar h1, .navbar h1 {
     color: hsl(166, 100%, 50%);
     text-shadow: 0 -.05em .05em rgba(0,0,0,.5);
     display:inline-block;;
@@ -18,18 +17,18 @@
     transform: rotate(-12deg) skew(10deg);
 }
 
-.navbar ul {
+.admin-navbar ul, .navbar ul {
     display: inline-block;
     list-style: none;
     margin-botttom: 5px;
 }
 
-.navbar li {
+.admin-navbar li, .navbar li {
     display: inline-block;
     margin-left:1vw;
 }
 
-.navbar a {
+.admin-navbar a, .navbar a {
     border-radius: 5px;
     box-shadow: 0 .05em .25em rgba(0,0,0,.5);
     border: 1px solid rgba(0,0,0,.1);
@@ -41,7 +40,7 @@
     text-decoration: none;
 }
 
-.navbar button {
+.admin-navbar button, .navbar button {
     padding: 0.3em 0.5em;
     border-radius: 5px;
     background-color: hsla(360, 100%, 100%, 1);
@@ -49,14 +48,14 @@
 }
 
 @media (max-width:543px) {
-    .navbar {
+    .admin-navbar, .navbar {
         justify-content: space-between;
     }
-    .navbar ul {
+    .admin-navbar ul, .navbar ul {
         display: none;
     }
 
-    .navbar button {
+    .admin-navbar button, .navbar button {
         display: inline;
         margin-right: 2vw;
     }

@@ -1,0 +1,63 @@
+/*navbar styling ***************************************************/
+.admin-navbar {
+    height: 10vh;
+    display: flex;
+    flex-flow: row;
+    justify-content: flex-start;
+    align-items: center;
+    background: linear-gradient(to right, hsl(203, 100%, 50%) , hsl(0, 6%, 88%));
+}
+
+.admin-navbar h1 {
+    color: hsl(166, 100%, 50%);
+    text-shadow: 0 -.05em .05em rgba(0,0,0,.5);
+    display:inline-block;;
+    padding: 2vw;
+    margin-bottom: 5px;
+}
+
+.admin-navbar ul {
+    display: inline-block;
+    list-style: none;
+    margin-botttom: 5px;
+}
+
+.admin-navbar li {
+    display: inline-block;
+    margin-left:1vw;
+}
+
+.admin-navbar a {
+    border-radius: 5px;
+    box-shadow: 0 .05em .25em rgba(0,0,0,.5);
+    border: 1px solid rgba(0,0,0,.1);
+    text-shadow: 0 -.05em .05em rgba(0,0,0,.5);
+    color: hsla(360, 100%, 100%, 1);
+    padding: 0.3em 0.5em;
+    line-height: 1.5;
+    background: hsla(204,65%,65%,0.6) linear-gradient(hsla(0,0%,100%,.2),transparent);
+    text-decoration: none;
+}
+
+.admin-navbar button {
+    padding: 0.3em 0.5em;
+    border-radius: 5px;
+    background-color: hsla(360, 100%, 100%, 1);
+    display: none;
+}
+
+@media (max-width:543px) {
+    .admin-navbar {
+        justify-content: space-between;
+    }
+    .admin-navbar ul {
+        display: none;
+    }
+
+    .admin-navbar button {
+        display: inline;
+        margin-right: 2vw;
+    }
+}
+
+/* end navbar styling **********************************************/

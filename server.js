@@ -4,12 +4,20 @@ const app = express();
 const bodyParser = require('body-parser')
 const multer  =   require('multer');
 
+const config = {
+    adminDir: '/client/html/admin/'
+}
+
+
+
 app.use(bodyParser.json());
 
 app.listen(3000, function() {
   console.log('listening on 3000')
 });
 
+// add private methods and properties here
+app.pvt = {};
 
 // Express looks up the files relative to the static directory,
 // so the name of the static directory is not part of the URL.
@@ -21,6 +29,47 @@ app.get('/', (req, res) => {
   // Note: __dirname is the path to your current working directory. Try logging it and see what you get!
   // Mine was '/Users/zellwk/Projects/demo-repos/crud-express-mongo' for this app.
 });
+
+
+app.get('/admin', (req, res) => {
+    res.sendFile(__dirname + config.adminDir + 'admin-index.html');
+});
+
+
+app.pvt.storage = multer.diskStorage({
+    // directory for uploads
+    destination: function(req, file, cb) {
+        // if file is image save to './public/images'
+        // if file is markdown save to './public/markdown'
+        // anything else ignore and do nothing
+        console.log('destination');
+        console.log('file-type: ' + req.body['file-type']);
+        if (req.body['file-type'] === 'md') {
+            cb(null, './public/markdown/')
+        }
+        else if (req.body['file-type'] === 'img') {
+            cb(null, './public/images/')
+        }
+        else {
+            // don't load file, how????
+            cb(null, './uploads/');
+        }
+
+    },
+    // server side filename for upload
+    filename: function(req, file, cb) {
+        // user provided name else original filename
+        req.body.users_filename ? cb(null, req.body.users_filename.trim() || file.originalname) : cb(null, file.originalname);
+    }
+});
+
+app.post('/admin-uploadfile', multer({storage: app.pvt.storage}).single('admin-upload-file'), function(req, res, next){
+    console.log('post /admin-uploadfile');
+    res.send('File uploaded');
+});
+
+
+
 
 app.get('/home', (req, res) => {
     console.log('home');
@@ -37,29 +86,36 @@ app.get('/uploadfile1',function(req,res){
     res.sendFile(__dirname + "/client/html/mgmt/uploadFile1.html");
 });
 
-var storage = multer.diskStorage({
-    destination: function(req, file, cb) {
-        cb(null, './uploads/');
-    },
-    filename: function(req, file, cb) {
-        cb(null, file.originalname);
-    }
-});
 
-//multer({ destination: './uploads/'})
-app.post('/uploadfile', multer({storage: storage}).single('upl'), function(req, res, next){
-    console.log('post /uploadfile');
 
-    console.log(req.file);
-    res.send('Done');
-    // upload(req,res,function(err) {
-    //     if(err) {
-    //         return res.end("Error uploading file.");
-    //     }
-    //     res.send("File is uploaded");
-    // });
-});
+// app.post('/uploadfile', multer({storage: storage}).single('upl'), function(req, res, next){
+//     console.log('post /uploadfile');
+//     res.send('File uploaded');
+// });
 
+app.get('/mdtohtml', (req, res) => {
+    console.log('get /mdtohtml');
+    var marked = require('marked');
+
+    var markdownString = '```js\n console.log("hello"); \n```';
+
+    // Async highlighting with pygmentize-bundled
+    marked.setOptions({
+      highlight: function (code, lang, callback) {
+        require('pygmentize-bundled')({ lang: lang, format: 'html' }, code, function (err, result) {
+          callback(err, result.toString());
+        });
+      }
+    });
+
+    // Using async version of marked
+    marked(markdownString, function (err, content) {
+      if (err) throw err;
+      console.log(content);
+    });
+
+    res.send('done');
+})
 
 
 

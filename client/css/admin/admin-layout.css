@@ -1,0 +1,27 @@
+/*basic admin layout *************************/
+@media (min-width:544px) {
+    #wrapper {
+        background-color: blue;
+        overflow: hidden;
+    }
+
+    #footer {
+        background-color: brown;
+        clear: both;
+        margin: 0.5em;
+    }
+
+    #events {
+        float:left;
+        width: calc(30% - 1em);
+        background-color: green;
+        margin: 0.5em;
+    }
+
+    #main {
+        float:left;
+        background-color: red;
+        width: calc(70% - 1em);
+        margin: 0.5em;
+    }
+}

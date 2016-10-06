@@ -1,0 +1,13 @@
+<form id="admin-upload-form"
+    enctype="multipart/form-data"
+    action="/admin-uploadfile"
+    method="post">
+    <label>Provide own filename</label>
+    <input id="admin-main-upload-user-filename" type="text" name="admin-user-filename" placeholder="Leave blank to default to local file name" />
+    <p id="admin-user-filename-error-msg"></p>
+    <label>File to upload</label>
+    <input id="admin-main-upload-file-type" type="hidden" name="file-type" value=""/>
+    <input id="admin-main-upload-file" type="file" name="admin-upload-file" />
+    <p id="admin-upload-file-error-msg"></p>
+    <input type="submit" value="Upload file" name="submit">
+</form>
