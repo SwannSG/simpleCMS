@@ -35,6 +35,18 @@ app.get('/admin', (req, res) => {
     res.sendFile(__dirname + config.adminDir + 'admin-index.html');
 });
 
+app.pvt.fileFilter = function(req, file, cb) {
+    if (req.body['file-type'] === 'md' || req.body['file-type'] === 'img') {
+        app.pvt.fileAccepted = true;
+        cb(null, true);
+    }
+    else {
+        app.pvt.fileAccepted = false;
+        cb(null, false);
+    }
+};
+
+
 
 app.pvt.storage = multer.diskStorage({
     // directory for uploads
@@ -42,8 +54,6 @@ app.pvt.storage = multer.diskStorage({
         // if file is image save to './public/images'
         // if file is markdown save to './public/markdown'
         // anything else ignore and do nothing
-        console.log('destination');
-        console.log('file-type: ' + req.body['file-type']);
         if (req.body['file-type'] === 'md') {
             cb(null, './public/markdown/')
         }
@@ -52,7 +62,7 @@ app.pvt.storage = multer.diskStorage({
         }
         else {
             // don't load file, how????
-            cb(null, './uploads/');
+            cb(null, './public/');
         }
 
     },
@@ -63,9 +73,14 @@ app.pvt.storage = multer.diskStorage({
     }
 });
 
-app.post('/admin-uploadfile', multer({storage: app.pvt.storage}).single('admin-upload-file'), function(req, res, next){
-    console.log('post /admin-uploadfile');
-    res.send('File uploaded');
+app.post('/admin-uploadfile', upload=multer({storage: app.pvt.storage, fileFilter: app.pvt.fileFilter}).single('admin-upload-file'), function(req, res, next){
+
+    if (app.pvt.fileAccepted) {
+        res.json( {file: 'accepted'} );
+    }
+    else {
+        res.json( {file: 'rejected'} );
+    }
 });
 
 
