@@ -205,6 +205,11 @@ app.get('/admin', (req, res) => {
   res.sendFile(__dirname + config.adminDir + 'admin-index.html');
 });
 
+app.get('/admin-main-images', (req, res) => {
+  res.json(['3.jpg', '2.jpg', '1.jpg']);
+});
+
+
 // upload file to server. If markdown file transform to html file.
 app.post('/admin-uploadfile', upload = multer({
   storage: app.pvt.storage,

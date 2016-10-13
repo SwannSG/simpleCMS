@@ -9,7 +9,7 @@ $('#admin-navbar-images').click((e) => {
   // show images with resource names
   e.preventDefault();
   $('#admin-main-content').load('html/admin/admin-main-images.html');
-  // $.getScript('js/admin/admin-main-images.js');
+  $.getScript('js/admin/admin-main-images.js');
 });
 
 
