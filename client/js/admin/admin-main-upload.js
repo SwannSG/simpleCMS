@@ -1,5 +1,3 @@
-// import $ from 'jquery';
-
 $('#admin-upload-form').submit(e => {
   // before submit we need to have
   // 1. an attached file
@@ -12,17 +10,7 @@ $('#admin-upload-form').submit(e => {
   // 6. set input file-type to value img or md
 
   console.log('submit');
-
-  var form = $(this); // this is the global window object
-
-  if (this === window) {
-      // true
-    console.log('this === window');
-  }
-  if (form === window) {
-      // false
-    console.log('form === window');
-  }
+  e.preventDefault();
 
   /** returns 'fileExt' from '*.fileExt' file name.
    *  abc.def returns 'def'
@@ -46,85 +34,77 @@ $('#admin-upload-form').submit(e => {
   }
 
   function showErrorMsg(selector, text) {
-      $(selector).text(text);
-      setTimeout(() => {
-          $(id).text('');
-      }, 2000);
+    $(selector).text(text);
+    setTimeout(() => {
+      $(selector).text('');
+    }, 2000);
   }
 
   function getFileType(fileExtension) {
-      return extToTest[fileExtension];
+    return extToTest[fileExtension];
   }
 
   var extToTest = {
-      MD: 'md',
-      JPEG: 'img',
-      JPG: 'img',
-      PNG: 'img',
-      GIFF: 'img',
-      GIF: 'img'
+    MD: 'md',
+    JPEG: 'img',
+    JPG: 'img',
+    PNG: 'img',
+    GIFF: 'img',
+    GIF: 'img'
   };
 
   // is file to upload valid
   var uploadFile = $('#admin-main-upload-file').val();
-  uploadFile = (uploadFile)
-      ? uploadFile.split('\\')[2]
-      : '' // extract filename
-  var uploadFileExtension = fileExt(uploadFile)
+  uploadFile = (uploadFile) ? uploadFile.split('\\')[2] : ''; // extract filename
+  var uploadFileExtension = fileExt(uploadFile);
   if (isValidFileExtension(uploadFileExtension)) {
-      // set hidden field file-type
-      var fileType = getFileType(uploadFileExtension);
-      $("#admin-main-upload-file-type").val(fileType);
+    // set hidden field file-type
+    var fileType = getFileType(uploadFileExtension);
+    $('#admin-main-upload-file-type').val(fileType);
   } else {
-      // the attached file is invalid
-      showErrorMsg('#admin-upload-file-error-msg', 'File not accepted.');
-      e.preventDefault();
+    // the attached file is invalid
+    showErrorMsg('#admin-upload-file-error-msg', 'File not accepted.');
   }
 
-  // user filename
+  // user named filename
   var userFilename = $('#admin-main-upload-user-filename').val();
   var userFileExtension = fileExt(userFilename);
   if (userFilename) {
-      // user renames the file
-      if (isValidFileExtension(userFileExtension)) {
-          // also test that users name is sensible
-          if (userFileExtension != uploadFileExtension) {
-              showErrorMsg('#admin-user-filename-error-msg', 'Filename provided is not acceptable.');
-              e.preventDefault();
-          } else {
-              // set hidden field value
-              $("#admin-main-upload-file-type").val(userFileExtension);
-          }
+    // user renames the file
+    if (isValidFileExtension(userFileExtension)) {
+      // also test that users name is sensible
+      if (userFileExtension != uploadFileExtension) {
+        showErrorMsg('#admin-user-filename-error-msg', 'Filename provided is not acceptable.');
+        e.preventDefault();
       } else {
-          // the user filename is invalid
-          showErrorMsg('#admin-user-filename-error-msg', 'Filename provided is not acceptable.');
-          e.preventDefault();
+        // set hidden field value
+        $('#admin-main-upload-file-type').val(userFileExtension);
       }
+    } else {
+      // the user filename is invalid
+      showErrorMsg('#admin-user-filename-error-msg', 'Filename provided is not acceptable.');
+    }
   }
 
-  // console.log(form[0]);
-  // for (each of Object.keys(form[0])) {
-  //     console.log(each);
-  // }
+  // create a new form
+  var formdata = new FormData();
+  formdata.append('admin-user-filename', userFilename);
+  formdata.append('file-type', fileType);
+  formdata.append('admin-upload-file', document.getElementById('admin-main-upload-file').files[0], uploadFile);
 
-  formdata = new FormData(form[0]);
-  console.log(formdata);
-  var formAction = form.attr('action');
+  // var formAction = form.attr('action');
   $.ajax({
-      type: "POST",
-      url: "/admin-uploadfile",
-      data: formdata
-          ? formdata
-          : form.serialize(),
-      processData: false,
-      contentType: false,
-      success: success
+    type: 'POST',
+    url: '/admin-uploadfile',
+    data: formdata, // ? formdata : form.serialize(),
+    processData: false,
+    contentType: false,
+    success: success
   });
 
-  function success(data) {
-      console.log('success');
-      console.log(data);
-      $('#admin-upload-file-error-msg').val('File uploaded successfully');
+  function success(data, status, jqXHR) {
+    var text = $.parseJSON(data);
+    // $('#admin-upload-file-error-msg').html('<p>' + text.status + '</p>');
+    $('#admin-upload-file-error-msg').text(text.status);
   }
-  console.log('the end')
-})
+});;

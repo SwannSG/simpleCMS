@@ -16,6 +16,11 @@
   "devDependencies": {
     "eslint": "^3.7.1",
     "eslint-config-google": "^0.6.0",
+    "eslint-config-standard": "6.2.0",
+    "eslint-plugin-dollar-sign": "1.0.0",
+    "eslint-plugin-promise": "3.0.0",
+    "eslint-plugin-react": "6.4.0",
+    "eslint-plugin-standard": "2.0.1",
     "nodemon": "^1.10.2"
   },
   "engines": {
