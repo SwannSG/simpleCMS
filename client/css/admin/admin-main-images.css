@@ -1,0 +1,13 @@
+#admin-main-images figure {
+  width: 20vw;
+  margin-right:3em;
+  margin-top:2em;
+}
+
+#admin-main-images img {
+  width:100%;
+}
+
+#admin-main-images figcaption {
+  text-align: center;
+}
