@@ -1,7 +1,9 @@
 #admin-main-images figure {
-  width: 20vw;
-  margin-right:3em;
+  width: 17vw;
+  margin-left:2em;
+  margin-right:2em;
   margin-top:2em;
+  position: relative;
 }
 
 #admin-main-images img {
@@ -10,4 +12,14 @@
 
 #admin-main-images figcaption {
   text-align: center;
+}
+
+#admin-main-images a {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+#admin-main-images i {
+  color: darkgray;
 }

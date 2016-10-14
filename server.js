@@ -12,7 +12,7 @@ const config = {
   adminDir: '/client/html/admin/',
   mdUpload: '/public/markdown/',
   clientHtml: '/client/html/user/',
-  imagesDir: '/public/images'
+  imagesDir: '/public/images/'
 };
 // end application configuration **********
 
@@ -181,6 +181,20 @@ app.pvt.getImgFilenames = (path) => {
     });
   });
 };
+
+app.pvt.deleteImage = (path) => {
+  return new Promise((resolve, reject) => {
+    fs.unlink(path, (err) => {
+      if (err) {
+        reject('Error: deleteImage ' + err);
+      } else {
+        resolve('deleteImage: success');
+      }
+    });
+  });
+};
+
+
 // end promises ***********************************************************************************************
 
 // end add private methods and properties here *********************************************************
@@ -219,8 +233,10 @@ app.get('/admin', (req, res) => {
 });
 
 app.get('/admin-main-images', (req, res) => {
-  // get array of all files in public/images directory
-  app.pvt.getImgFilenames(__dirname + config.imagesDir)
+  // display array of all files in public/images directory
+  var imgDir = __dirname + config.imagesDir.slice(0, -1);
+  console.log(imgDir);
+  app.pvt.getImgFilenames(__dirname + config.imagesDir.slice(0, -1))
     .then((x) => {
       res.json({
         static: 'images/',
@@ -235,6 +251,21 @@ app.get('/admin-main-images', (req, res) => {
       });
     });
 });
+
+app.get('/admin-main-images-delete', (req, res) => {
+  var imgToDelete = req.query.image;
+  imgToDelete = __dirname + config.imagesDir + imgToDelete;
+  app.pvt.deleteImage(imgToDelete)
+    .then(() => {
+      // redirect to show all images
+      res.redirect('/admin-main-images');
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
+
+
 
 
 // upload file to server. If markdown file transform to html file.
