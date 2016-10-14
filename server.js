@@ -11,7 +11,8 @@ const marked = require('marked');
 const config = {
   adminDir: '/client/html/admin/',
   mdUpload: '/public/markdown/',
-  clientHtml: '/client/html/user/'
+  clientHtml: '/client/html/user/',
+  imagesDir: '/public/images'
 };
 // end application configuration **********
 
@@ -168,6 +169,18 @@ app.pvt.writeFile = (arg) => {
     });
   });
 };
+
+app.pvt.getImgFilenames = (path) => {
+  return new Promise((resolve, reject) => {
+    fs.readdir(path, (err, files) => {
+      if (err) {
+        reject('Error: getImgFilenames' + err);
+      } else {
+        resolve(files);
+      }
+    });
+  });
+};
 // end promises ***********************************************************************************************
 
 // end add private methods and properties here *********************************************************
@@ -206,7 +219,21 @@ app.get('/admin', (req, res) => {
 });
 
 app.get('/admin-main-images', (req, res) => {
-  res.json(['3.jpg', '2.jpg', '1.jpg']);
+  // get array of all files in public/images directory
+  app.pvt.getImgFilenames(__dirname + config.imagesDir)
+    .then((x) => {
+      res.json({
+        static: 'images/',
+        images: x
+      });
+    })
+    .catch((x) => {
+      console.log(x);
+      res.json({
+        static: 'images/',
+        images: x
+      });
+    });
 });
 
 
