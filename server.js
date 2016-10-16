@@ -12,7 +12,8 @@ const config = {
   adminDir: '/client/html/admin/',
   mdUpload: '/public/markdown/',
   clientHtml: '/client/html/user/',
-  imagesDir: '/public/images/'
+  imagesDir: '/public/images/',
+  serverDocFile: '/server/data/documentMap.txt'
 };
 // end application configuration **********
 
@@ -75,7 +76,7 @@ app.pvt.storage = multer.diskStorage({
 app.pvt.fileExist = (arg) => {
   // does file_in exist ?
   // arg = {file_in: string, file_out: string}
-  if (!arg.file_in || !arg.file_out) {
+  if (!arg.file_in) {
     return new Promise((resolve, reject) => {
       reject('function fileExist: invalid parmeters');
     });
@@ -196,8 +197,41 @@ app.pvt.deleteImage = (path) => {
 
 
 // end promises ***********************************************************************************************
-
 // end add private methods and properties here *********************************************************
+
+
+// read and load document json config file ********************************************************
+// executed on startup
+app.pvt.fileExist({
+    file_in: __dirname + config.serverDocFile
+  })
+  .then(app.pvt.readFile)
+  .then((x) => {
+    console.log('x.textOut');
+    console.log(x.textOut);
+    app.pvt.serverDocFile = JSON.parse(x.textOut);
+    // console.log('app.pvt.serverDocFile');
+    console.log(app.pvt.serverDocFile);
+  })
+  .catch(() => {
+    // file_in does not exist, initialise object
+    app.pvt.serverDocFile = {};
+  });
+// end read and load document json config file ****************************************************
+
+// save json object to specified file *************************************************************
+app.pvt.serverDocFile = {
+  1: 1,
+  a: 2,
+  b: [1, 2, 3]
+};
+app.pvt.writeFile({
+    file_out: __dirname + config.serverDocFile,
+    htmlOut: JSON.stringify(app.pvt.serverDocFile)
+  })
+  .then()
+  .catch();
+// end save json object to specified file *********************************************************
 
 
 
@@ -252,21 +286,18 @@ app.get('/admin-main-images', (req, res) => {
     });
 });
 
-app.get('/admin-main-images-delete', (req, res) => {
-  var imgToDelete = req.query.image;
+app.delete('/admin-main-images-delete', (req, res) => {
+  var imgToDelete = req.body.imageName;
   imgToDelete = __dirname + config.imagesDir + imgToDelete;
   app.pvt.deleteImage(imgToDelete)
     .then(() => {
       // redirect to show all images
-      res.redirect('/admin-main-images');
+      res.json('status: success');
     })
     .catch((err) => {
-      console.log(err);
+      res.json('status: error' + err);
     });
 });
-
-
-
 
 // upload file to server. If markdown file transform to html file.
 app.post('/admin-uploadfile', upload = multer({

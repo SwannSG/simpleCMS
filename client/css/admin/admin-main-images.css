@@ -1,3 +1,7 @@
+#admin-main-images li {
+  display: inline-block;
+}
+
 #admin-main-images figure {
   width: 17vw;
   margin-left:2em;
