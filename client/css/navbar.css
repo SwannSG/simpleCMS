@@ -1,19 +1,18 @@
 /*navbar styling ***************************************************/
 .admin-navbar, .navbar {
-    height: 16vh;
-    display: flex;
-    flex-flow: row;
-    justify-content: flex-start;
-    align-items: center;
-    background: linear-gradient(to right, hsl(203, 100%, 50%) , hsl(0, 6%, 88%));
+  align-items: center;
+  background: #e1ff00 linear-gradient(to right, hsla(0,0%,100%,.5),transparent);
+  display: flex;
+  flex-flow: row;
+  height: 5em;
+  justify-content: flex-start;
 }
 
 .admin-navbar h1, .navbar h1 {
     color: hsl(166, 100%, 50%);
     text-shadow: 0 -.05em .05em rgba(0,0,0,.5);
     display:inline-block;;
-    padding: 2vw;
-    margin-bottom: 5px;
+    margin: 0 1em;
     transform: rotate(-12deg) skew(10deg);
 }
 
@@ -29,15 +28,16 @@
 }
 
 .admin-navbar a, .navbar a {
-    border-radius: 5px;
-    box-shadow: 0 .05em .25em rgba(0,0,0,.5);
-    border: 1px solid rgba(0,0,0,.1);
-    text-shadow: 0 -.05em .05em rgba(0,0,0,.5);
-    color: hsla(360, 100%, 100%, 1);
-    padding: 0.3em 0.5em;
-    line-height: 1.5;
-    background: hsla(204,65%,65%,0.6) linear-gradient(hsla(0,0%,100%,.2),transparent);
-    text-decoration: none;
+  background-image: background: hsla(204,65%,65%,0.6) -webkit-linear-gradient(left, hsla(0,0%,100%,.2), transparent);
+  background-image: background: hsla(204,65%,65%,0.6) -o-linear-gradient(left, hsla(0,0%,100%,.2), transparent);
+  background-image: background: hsla(204,65%,65%,0.6) linear-gradient(to right, hsla(0,0%,100%,.2), transparent);
+  border-radius: 0.2em;
+  box-shadow: 0 .05em .25em rgba(0,0,0,.5);
+  border: 1px solid rgba(0,0,0,.1);
+  text-shadow: 0 -.05em .05em rgba(0,0,0,.5);
+  padding: 0.3em 0.5em;
+  line-height: 1.5;
+  text-decoration: none;
 }
 
 .admin-navbar button, .navbar button {

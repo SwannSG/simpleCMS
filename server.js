@@ -20,14 +20,22 @@ const config = {
 
 // Async highlighting with pygmentize-bundled *************
 marked.setOptions({
-  highlight: function(code, lang, callback) {
-    require('pygmentize-bundled')({
-      lang: lang,
-      format: 'html'
-    }, code, function(err, result) {
-      callback(err, result.toString());
-    });
-  }
+  // highlight: function(code, lang, callback) {
+  //   require('pygmentize-bundled')({
+  //     lang: lang,
+  //     format: 'html'
+  //   }, code, function(err, result) {
+  //     callback(err, result.toString());
+  //   });
+  // }
+  renderer: new marked.Renderer(),
+  gfm: true,
+  tables: true,
+  breaks: false,
+  pedantic: false,
+  sanitize: false,
+  smartLists: true,
+  smartypants: false
 });
 // end Async highlighting with pygmentize-bundled ********
 
@@ -61,7 +69,6 @@ app.pvt.storage = multer.diskStorage({
       // don't load file, how????
       cb(null, './public/');
     }
-
   },
   // server side filename for upload
   filename: function(req, file, cb) {
@@ -71,7 +78,38 @@ app.pvt.storage = multer.diskStorage({
   }
 });
 
-// promises ***********************************************************************************************
+// helper functions******************************************************************************
+app.pvt.getMdFileType = (file_in) => {
+  var partFilename = file_in.slice(file_in.lastIndexOf('/') + 1, file_in.lastIndexOf('.'));
+  if (partFilename.includes('event-stub-')) {
+    return 'event-stub';
+  } else {
+    return 'none';
+  }
+};
+
+app.pvt.eventStubMap = (line, arg) => {
+  var result = /^[Tt]itle[ ]*:[ ]*(.*)/.exec(line.trim());
+  arg.title = result ? result[1] : '';
+  result = /^[Ww]hen[ ]*:[ ]*(.*)/.exec(line.trim());
+  arg.date = result ? result[1] : '';
+  result = /^[Ww]here[ ]*:[ ]*(.*)/.exec(line.trim());
+  arg.venue = result ? result[1] : '';
+  result = arg.title + arg.date + arg.venue;
+  console.log('line: ' + line);
+  console.log('result: ' + result);
+  if (result) {
+    return result;
+  } else {
+    return line;
+  }
+};
+
+
+// end helper functions******************************************************************************
+
+
+// promises *********
 // we can cascade parameters (to be used later in another promise) passed to the first promise function, by passing all parameters needed to the first paramter.
 app.pvt.fileExist = (arg) => {
   // does file_in exist ?
@@ -87,6 +125,7 @@ app.pvt.fileExist = (arg) => {
         reject('function fileExist: file ' + arg.file_in + ' does not exist');
       } else {
         console.log('fileExist resolve: ' + arg);
+        arg.mdFiletype = app.pvt.getMdFileType(arg.file_in);
         resolve(arg);
       }
     });
@@ -122,7 +161,28 @@ app.pvt.readFile = (arg) => {
   });
   var textOut = '';
   rl.on('line', function(line) {
-    textOut = textOut + '\n' + line;
+    if (arg.mdFiletype === 'event-stub') {
+      // for an event-stub-n.md file we get some parameters and mess with the text
+      textOut = textOut + '\n' + app.pvt.eventStubMap(line, arg);
+
+
+      // var result = /^[Tt]itle[ ]*:[ ]*(.*)/.exec(line.trim());
+      // arg.title = result ? result[1] : '';
+      // result = /^[Ww]hen[ ]*:[ ]*(.*)/.exec(line.trim());
+      // arg.date = result ? result[1] : '';
+      // result = /^[Ww]here[ ]*:[ ]*(.*)/.exec(line.trim());
+      // arg.venue = result ? result[1] : '';
+      // result = arg.title + arg.date + arg.venue;
+      // console.log('line: ' + line);
+      // console.log('result: ' + result);
+      // if (result) {
+      //   textOut = textOut + '\n' + result;
+      // } else {
+      //   textOut = textOut + '\n' + line;
+      // }
+    } else {
+      textOut = textOut + '\n' + line;
+    }
   });
 
   var promise = new Promise((resolve, reject) => {
@@ -136,26 +196,61 @@ app.pvt.readFile = (arg) => {
       // file_in read ok
       clearTimeout(timer);
       arg.textOut = textOut;
+      console.log(arg);
       resolve(arg);
     });
   });
   return promise;
 };
 
-app.pvt.textToMd = (arg) => {
+app.pvt.mdToHTML = (arg) => {
   // convert markdown text to html
   // arg = {file_in: string, file_out: string, arg.textOut: markdown_text}
+  console.log(arg.textOut);
   var promise = new Promise((resolve, reject) => {
     marked(arg.textOut, (err, htmlOut) => {
       if (err) {
         reject('Error: Failed to convert arg.textOut to arg.htmlOut');
       } else {
         arg.htmlOut = htmlOut;
+        console.log(htmlOut);
         resolve(arg);
       }
     });
   });
   return promise;
+};
+
+app.pvt.addHTMLwrapper = (arg) => {
+  // add wrapper html around html
+  //    the wrapper html will depend on the file_out filename
+  // arg = {file_in: string, file_out: string, arg.textOut: markdown_text, arg.htmlOut}
+  console.log('addHTMLwrapper');
+  var err = false;
+  var partFilename = arg.file_out.slice(arg.file_out.lastIndexOf('/') + 1, arg.file_out.lastIndexOf('.'));
+  console.log(partFilename);
+  if (partFilename.includes('event-stub-')) {
+    arg.htmlOut = '<div class="event-stub">' + arg.htmlOut;
+    // add button strip
+    var eventTitle = 'title';
+    var eventDate = 'date';
+    var eventVenue = 'venue';
+    arg.htmlOut = arg.htmlOut + '<div class="event-stub-button-line"> \
+      <button onclick="event_stub.moreInfo(\'' + partFilename + '\')">More Info</button> \
+      <button onclick="event_stub.book({title:\'' + eventTitle + '\',date:\'' + eventDate + '\'})">Book</button> \
+      <button> iCal </button> \
+      </div> ';
+    arg.htmlOut = arg.htmlOut + '</div>';
+    console.log(arg.htmlOut);
+  } else {
+    // do nothing for now
+  }
+  return new Promise((resolve, reject) => {
+    if (err) {
+      reject('An error occured');
+    }
+    resolve(arg);
+  });
 };
 
 app.pvt.writeFile = (arg) => {
@@ -316,20 +411,18 @@ app.post('/admin-uploadfile', upload = multer({
       if (req.body['file-type'] === 'md') {
         // convert markdown file
         var file_in = __dirname + config.mdUpload + app.pvt.filename;
-        var file_out = __dirname + config.clientHtml + 'test.html';
-        console.log(file_in);
-        console.log(file_out);
+        var file_out = __dirname + config.clientHtml + file_in.slice(file_in.lastIndexOf('/'), file_in.lastIndexOf('.')) + '.html';
         app.pvt.fileExist({
             file_in: file_in,
             file_out: file_out
           })
           .then(app.pvt.pathExist)
           .then(app.pvt.readFile)
-          .then(app.pvt.textToMd)
+          .then(app.pvt.mdToHTML)
+          .then(app.pvt.addHTMLwrapper)
           .then(app.pvt.writeFile)
-          .then((x) => {
+          .then(() => {
             // shows success of chain of operations
-            console.log(x);
             res.json({
               status: 'Markdown file converted and loaded'
             });
@@ -371,44 +464,6 @@ app.get('/uploadfile1', function(req, res) {
   console.log('get /uploadfile1');
   res.sendFile(__dirname + '/client/html/mgmt/uploadFile1.html');
 });
-
-
-
-// app.post('/uploadfile', multer({storage: storage}).single('upl'), function(req, res, next){
-//     console.log('post /uploadfile');
-//     res.send('File uploaded');
-// });
-
-app.get('/mdtohtml', (req, res) => {
-  console.log('get /mdtohtml');
-  var marked = require('marked');
-
-  var markdownString = '```js\n console.log("hello"); \n```';
-
-  // Async highlighting with pygmentize-bundled
-  marked.setOptions({
-    highlight: function(code, lang, callback) {
-      require('pygmentize-bundled')({
-        lang: lang,
-        format: 'html'
-      }, code, function(err, result) {
-        callback(err, result.toString());
-      });
-    }
-  });
-
-  // Using async version of marked
-  marked(markdownString, function(err, content) {
-    if (err) throw err;
-    console.log(content);
-  });
-
-  res.send('done');
-});
-
-
-
-
 
 app.get('/postJSON', (req, res) => {
   console.log('get postJSON');

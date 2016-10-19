@@ -1,8 +1,9 @@
 /*basic layout of site *************************/
 @media (min-width:544px) {
+/*large screen*/
     #wrapper {
-        background-color: blue;
         overflow: hidden;
+        background-color: lightblue;
     }
 
     #footer {
@@ -11,33 +12,31 @@
         margin: 0.5em;
     }
 
-    #events {
+    #event-stubs {
         float:left;
-        width: calc(30% - 1em);
-        background-color: green;
+        width: calc(35% - 1em);
         margin: 0.5em;
     }
 
     #main {
         float:left;
-        background-color: red;
-        width: calc(70% - 1em);
+        width: calc(65% - 1em);
         margin: 0.5em;
     }
 }
+/*end large screen*/
 
 @media (max-width:543px) {
+/*small screen*/
     #footer {
         display:none;
     }
-    #events {
+    #event-stubs {
         display:none;
     }
     #main {
         background-color: red;
     }
 }
-
-
-
+/*end small screen*/
 /*end basic layout of site *************************/
