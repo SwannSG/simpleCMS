@@ -79,33 +79,46 @@ app.pvt.storage = multer.diskStorage({
 });
 
 // helper functions******************************************************************************
-app.pvt.getMdFileType = (file_in) => {
-  var partFilename = file_in.slice(file_in.lastIndexOf('/') + 1, file_in.lastIndexOf('.'));
+app.pvt.markdownFileType = (arg) => {
+  // conditionally add properties to arg: mdFileType, target
+  var partFilename = arg.file_in.slice(arg.file_in.lastIndexOf('/') + 1, arg.file_in.lastIndexOf('.'));
   if (partFilename.includes('event-stub-')) {
-    return 'event-stub';
+    arg.mdFiletype = 'event-stub';
+    arg.target = 'event-' + partFilename.slice(-1);
+
+    // add default values here as well
+
   } else {
-    return 'none';
+    arg.mdFiletype = 'none';
   }
+  return;
 };
 
 app.pvt.eventStubMap = (line, arg) => {
+  // changes markdown, removes Title:, When:, Where:
+  // add property names and values to arg: arg.title, arg.when, arg.where
   var result = /^[Tt]itle[ ]*:[ ]*(.*)/.exec(line.trim());
-  arg.title = result ? result[1] : '';
-  result = /^[Ww]hen[ ]*:[ ]*(.*)/.exec(line.trim());
-  arg.date = result ? result[1] : '';
-  result = /^[Ww]here[ ]*:[ ]*(.*)/.exec(line.trim());
-  arg.venue = result ? result[1] : '';
-  result = arg.title + arg.date + arg.venue;
-  console.log('line: ' + line);
-  console.log('result: ' + result);
   if (result) {
-    return result;
-  } else {
-    return line;
+    arg.title = result[1];
+    return arg.title;
   }
+  result = /^[Ww]hen[ ]*:[ ]*(.*)/.exec(line.trim());
+  if (result) {
+    arg.when = result[1];
+    return arg.when;
+  }
+  result = /^[Ww]here[ ]*:[ ]*(.*)/.exec(line.trim());
+  if (result) {
+    arg.where = result[1];
+    return arg.where;
+  }
+  result = /^[Ss]heet[ ]*:[ ]*(.*)/.exec(line.trim());
+  if (result) {
+    arg.sheetName = result[1];
+    return '';
+  }
+  return line;
 };
-
-
 // end helper functions******************************************************************************
 
 
@@ -124,8 +137,7 @@ app.pvt.fileExist = (arg) => {
       if (err && err.code === 'ENOENT') {
         reject('function fileExist: file ' + arg.file_in + ' does not exist');
       } else {
-        console.log('fileExist resolve: ' + arg);
-        arg.mdFiletype = app.pvt.getMdFileType(arg.file_in);
+        app.pvt.markdownFileType(arg);
         resolve(arg);
       }
     });
@@ -160,26 +172,17 @@ app.pvt.readFile = (arg) => {
     terminal: false
   });
   var textOut = '';
+  if (arg.mdFiletype === 'event-stub') {
+    // setup default property names and values for event-stub-n.md file
+    arg.title = '';
+    arg.when = '';
+    arg.where = '';
+    arg.sheetName = '';
+  }
   rl.on('line', function(line) {
     if (arg.mdFiletype === 'event-stub') {
       // for an event-stub-n.md file we get some parameters and mess with the text
       textOut = textOut + '\n' + app.pvt.eventStubMap(line, arg);
-
-
-      // var result = /^[Tt]itle[ ]*:[ ]*(.*)/.exec(line.trim());
-      // arg.title = result ? result[1] : '';
-      // result = /^[Ww]hen[ ]*:[ ]*(.*)/.exec(line.trim());
-      // arg.date = result ? result[1] : '';
-      // result = /^[Ww]here[ ]*:[ ]*(.*)/.exec(line.trim());
-      // arg.venue = result ? result[1] : '';
-      // result = arg.title + arg.date + arg.venue;
-      // console.log('line: ' + line);
-      // console.log('result: ' + result);
-      // if (result) {
-      //   textOut = textOut + '\n' + result;
-      // } else {
-      //   textOut = textOut + '\n' + line;
-      // }
     } else {
       textOut = textOut + '\n' + line;
     }
@@ -196,7 +199,6 @@ app.pvt.readFile = (arg) => {
       // file_in read ok
       clearTimeout(timer);
       arg.textOut = textOut;
-      console.log(arg);
       resolve(arg);
     });
   });
@@ -206,14 +208,12 @@ app.pvt.readFile = (arg) => {
 app.pvt.mdToHTML = (arg) => {
   // convert markdown text to html
   // arg = {file_in: string, file_out: string, arg.textOut: markdown_text}
-  console.log(arg.textOut);
   var promise = new Promise((resolve, reject) => {
     marked(arg.textOut, (err, htmlOut) => {
       if (err) {
         reject('Error: Failed to convert arg.textOut to arg.htmlOut');
       } else {
         arg.htmlOut = htmlOut;
-        console.log(htmlOut);
         resolve(arg);
       }
     });
@@ -225,26 +225,20 @@ app.pvt.addHTMLwrapper = (arg) => {
   // add wrapper html around html
   //    the wrapper html will depend on the file_out filename
   // arg = {file_in: string, file_out: string, arg.textOut: markdown_text, arg.htmlOut}
-  console.log('addHTMLwrapper');
   var err = false;
-  var partFilename = arg.file_out.slice(arg.file_out.lastIndexOf('/') + 1, arg.file_out.lastIndexOf('.'));
-  console.log(partFilename);
-  if (partFilename.includes('event-stub-')) {
+  if (arg.mdFiletype.includes('event-stub')) {
     arg.htmlOut = '<div class="event-stub">' + arg.htmlOut;
     // add button strip
-    var eventTitle = 'title';
-    var eventDate = 'date';
-    var eventVenue = 'venue';
     arg.htmlOut = arg.htmlOut + '<div class="event-stub-button-line"> \
-      <button onclick="event_stub.moreInfo(\'' + partFilename + '\')">More Info</button> \
-      <button onclick="event_stub.book({title:\'' + eventTitle + '\',date:\'' + eventDate + '\'})">Book</button> \
+      <button onclick="event_stub.moreInfo(\'' + arg.target + '\')">More Info</button> \
+      <button onclick="event_stub.book({sheetName:\'' + arg.sheetName + '\'})">Book</button> \
       <button> iCal </button> \
       </div> ';
     arg.htmlOut = arg.htmlOut + '</div>';
-    console.log(arg.htmlOut);
   } else {
     // do nothing for now
   }
+
   return new Promise((resolve, reject) => {
     if (err) {
       reject('An error occured');
@@ -302,11 +296,7 @@ app.pvt.fileExist({
   })
   .then(app.pvt.readFile)
   .then((x) => {
-    console.log('x.textOut');
-    console.log(x.textOut);
     app.pvt.serverDocFile = JSON.parse(x.textOut);
-    // console.log('app.pvt.serverDocFile');
-    console.log(app.pvt.serverDocFile);
   })
   .catch(() => {
     // file_in does not exist, initialise object
@@ -338,9 +328,7 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 
 
-app.listen(3000, function() {
-  console.log('listening on 3000');
-});
+app.listen(3000, function() {});
 
 
 // Express looks up the files relative to the static directory,
@@ -350,7 +338,6 @@ app.use(express.static('public'));
 
 
 app.get('/', (req, res) => {
-  console.log(__dirname);
   res.sendFile(__dirname + '/index.html');
   // Note: __dirname is the path to your current working directory. Try logging it and see what you get!
   // Mine was '/Users/zellwk/Projects/demo-repos/crud-express-mongo' for this app.
@@ -363,8 +350,6 @@ app.get('/admin', (req, res) => {
 
 app.get('/admin-main-images', (req, res) => {
   // display array of all files in public/images directory
-  var imgDir = __dirname + config.imagesDir.slice(0, -1);
-  console.log(imgDir);
   app.pvt.getImgFilenames(__dirname + config.imagesDir.slice(0, -1))
     .then((x) => {
       res.json({
@@ -373,7 +358,6 @@ app.get('/admin-main-images', (req, res) => {
       });
     })
     .catch((x) => {
-      console.log(x);
       res.json({
         static: 'images/',
         images: x
@@ -405,7 +389,6 @@ app.post('/admin-uploadfile', upload = multer({
     'Content-Type': 'text/html',
   });
 
-  console.log(app.pvt.fileAccepted);
   setTimeout(function() {
     if (app.pvt.fileAccepted) {
       if (req.body['file-type'] === 'md') {
@@ -428,9 +411,8 @@ app.post('/admin-uploadfile', upload = multer({
             });
           })
           .catch((err) => {
-            console.log(err);
             res.json({
-              status: 'Error: Markdown file not converted'
+              status: 'Error: Markdown file not converted' + err
             });
           });
         // end convert markdown file
@@ -451,29 +433,23 @@ app.post('/admin-uploadfile', upload = multer({
 
 
 app.get('/home', (req, res) => {
-  console.log('home');
   res.sendFile(__dirname + '/index.html');
 });
 
 app.get('/uploadfile', function(req, res) {
-  console.log('get /uploadfile');
   res.sendFile(__dirname + '/client/html/mgmt/uploadFile.html');
 });
 
 app.get('/uploadfile1', function(req, res) {
-  console.log('get /uploadfile1');
   res.sendFile(__dirname + '/client/html/mgmt/uploadFile1.html');
 });
 
 app.get('/postJSON', (req, res) => {
-  console.log('get postJSON');
   res.sendFile(__dirname + '/client/html/mgmt/postJSON.html');
 });
 
 app.post('/rest/jsonData', (req, res) => {
-  console.log('post JSON data');
   // bodyParser handles this in req.body and returns js object
-  console.log(req.body); // js object
   var jsObj = req.body;
   res.send(jsObj);
 });
@@ -485,7 +461,6 @@ app.post('/rest/jsonData', (req, res) => {
 
 app.get('/readwritewp', (req, res) => {
   // read, write with promises
-  console.log('/readwritewp');
 
 
   var file_in = __dirname + '/md/testFile.html';
@@ -543,7 +518,6 @@ app.get('/readwritewp', (req, res) => {
       if (line.indexOf('<html>') < 0 && line.indexOf('</html>') < 0 &&
         line.indexOf('<body>') < 0 && line.indexOf('</body>') < 0) {
         // skip the line and do nothing
-        // console.log(line)
         textOut = textOut + '\n' + line;
       }
     });
@@ -591,7 +565,6 @@ app.get('/readwritewp', (req, res) => {
 app.get('/readfile', (req, res) => {
   // ERROR HANDLING FOR FILES NEEDS TO BE HANDLED !!!!!!!!!!!!!
   // DOES fp GET CLOSED AUTOMATICALLY ?????
-  console.log('/readfile');
 
   var file_in = __dirname + '/md/testFile.html';
   var file_out = __dirname + '/md/testFileOut.html';
@@ -602,17 +575,14 @@ app.get('/readfile', (req, res) => {
   // does file exist
   fs.access(file_in, function(err) {
     if (err && err.code === 'ENOENT') {
-      console.log('error: file does not exist');
       res.send('File does not exist: ' + file_in);
     } else {
-      console.log('file exists');
 
       // check path to file_out exists
       // get file_out path
       fs.access(require('path').dirname(file_out), function(err) {
         if (err) {
           // file_out path not exist
-          console.log(err.code);
           res.send('error file_out path not exist: ' + file_out);
         } else {
           // file_out path exists
@@ -630,14 +600,12 @@ app.get('/readfile', (req, res) => {
             if (line.indexOf('<html>') < 0 && line.indexOf('</html>') < 0 &&
               line.indexOf('<body>') < 0 && line.indexOf('</body>') < 0) {
               // skip the line and do nothing
-              // console.log(line)
               textOut = textOut + '\n' + line;
 
             }
             // we need to write to file_out HOW TO DETECT
           });
           rl.on('close', function() {
-            console.log('rl.on(\'close\'.....');
             fs.writeFile(file_out, textOut, function(err) {
               if (err) {
                 res.send('File cockup: ' + err.code);
@@ -650,24 +618,4 @@ app.get('/readfile', (req, res) => {
       });
     }
   });
-});
-
-app.get('/writefile', (req, res) => {
-  console.log('writefile');
-
-  var filename = __dirname + '/md/writeTest.txt';
-
-  var fs = require('fs');
-
-  fs.writeFile(filename, 'New Text to Write', function(err) {
-    if (err) {
-      console.log('error: writing to ' + filename);
-      console.log(err);
-    } else {
-      console.log('success: writing to ' + filename);
-    }
-  });
-
-  res.send('File write ok: ' + filename);
-
 });

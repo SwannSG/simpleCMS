@@ -7,3 +7,5 @@ A short description of how fantastic the workshop is. Stretching and muscle exte
 When :  Saturday, 30 October 2016, 3.30pm
 
 Where: The New Citadel
+
+Sheet: NameOfSheetInGoogleDocs

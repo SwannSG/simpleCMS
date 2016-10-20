@@ -17,6 +17,7 @@
     padding-bottom: 0.3em;
 }
 
+/*title*/
 .event-stub p:nth-child(2) {
   display: inline-block;
   width: calc(65% - 1.5em);
@@ -24,17 +25,29 @@
   padding-left: 1em;
   margin-top: -0.2em;
 }
+/*end title*/
 
+/*body */
 .event-stub p:nth-child(3) {
   display: inline-block;
 }
+/*end body*/
 
+/*when*/
 .event-stub p:nth-child(4) {
   padding: 0.5em 0.7em;
   text-align: center;
   font-weight: bolder;
 }
+/*end when*/
 
+/*where*/
+.event-stub p:nth-child(5) {
+  padding: 0 0.7em;
+  text-align: center;
+  font-weight: bolder;
+}
+/*end where*/
 
 .event-stub-button-line {
     margin-top: 0.5em;
@@ -42,9 +55,3 @@
     display: flex;
     justify-content:space-around;
 }
-
-/*.event-stub button {
-    padding: 0.3em 0.5em;
-    border-radius: 5px;
-    background-color: hsla(360, 100%, 100%, 1);
-}*/
