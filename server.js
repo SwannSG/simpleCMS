@@ -5,6 +5,10 @@ const multer = require('multer');
 const fs = require('fs');
 const marked = require('marked');
 
+// 'simpleCMS/server/js' dir for own js
+const helper = require('./server/js/helper');
+
+
 // end require *****************************
 
 // application configuration **************
@@ -84,10 +88,7 @@ app.pvt.markdownFileType = (arg) => {
   var partFilename = arg.file_in.slice(arg.file_in.lastIndexOf('/') + 1, arg.file_in.lastIndexOf('.'));
   if (partFilename.includes('event-stub-')) {
     arg.mdFiletype = 'event-stub';
-    arg.target = 'event-' + partFilename.slice(-1);
-
-    // add default values here as well
-
+    arg.htmlTarget = 'event-' + partFilename.slice(-1);
   } else {
     arg.mdFiletype = 'none';
   }
@@ -96,28 +97,26 @@ app.pvt.markdownFileType = (arg) => {
 
 app.pvt.eventStubMap = (line, arg) => {
   // changes markdown, removes Title:, When:, Where:
-  // add property names and values to arg: arg.title, arg.when, arg.where
-  var result = /^[Tt]itle[ ]*:[ ]*(.*)/.exec(line.trim());
-  if (result) {
-    arg.title = result[1];
-    return arg.title;
-  }
-  result = /^[Ww]hen[ ]*:[ ]*(.*)/.exec(line.trim());
-  if (result) {
-    arg.when = result[1];
-    return arg.when;
-  }
-  result = /^[Ww]here[ ]*:[ ]*(.*)/.exec(line.trim());
-  if (result) {
-    arg.where = result[1];
-    return arg.where;
-  }
-  result = /^[Ss]heet[ ]*:[ ]*(.*)/.exec(line.trim());
+  // add property names and values to arg:
+  var result = /^[Ss]heet[ ]*:[ ]*(.*)/.exec(line.trim());
   if (result) {
     arg.sheetName = result[1];
     return '';
   }
   return line;
+};
+
+app.pvt.addHTML = (arg) => {
+  if (arg.mdFiletype === 'event-stub') {
+    arg.htmlOut = '<div class="event-stub">' + arg.htmlOut;
+    // add button strip
+    arg.htmlOut = arg.htmlOut + '<div class="event-stub-button-line"> \
+      <button onclick="event_stub.moreInfo(\'' + arg.htmlTarget + '\')">More Info</button> \
+      <button onclick="event_stub.book({sheetName:\'' + arg.sheetName + '\'})">Book</button> \
+      <button> iCal </button> \
+      </div> ';
+    arg.htmlOut = arg.htmlOut + '</div>';
+  }
 };
 // end helper functions******************************************************************************
 
@@ -172,13 +171,6 @@ app.pvt.readFile = (arg) => {
     terminal: false
   });
   var textOut = '';
-  if (arg.mdFiletype === 'event-stub') {
-    // setup default property names and values for event-stub-n.md file
-    arg.title = '';
-    arg.when = '';
-    arg.where = '';
-    arg.sheetName = '';
-  }
   rl.on('line', function(line) {
     if (arg.mdFiletype === 'event-stub') {
       // for an event-stub-n.md file we get some parameters and mess with the text
@@ -227,16 +219,7 @@ app.pvt.addHTMLwrapper = (arg) => {
   // arg = {file_in: string, file_out: string, arg.textOut: markdown_text, arg.htmlOut}
   var err = false;
   if (arg.mdFiletype.includes('event-stub')) {
-    arg.htmlOut = '<div class="event-stub">' + arg.htmlOut;
-    // add button strip
-    arg.htmlOut = arg.htmlOut + '<div class="event-stub-button-line"> \
-      <button onclick="event_stub.moreInfo(\'' + arg.target + '\')">More Info</button> \
-      <button onclick="event_stub.book({sheetName:\'' + arg.sheetName + '\'})">Book</button> \
-      <button> iCal </button> \
-      </div> ';
-    arg.htmlOut = arg.htmlOut + '</div>';
-  } else {
-    // do nothing for now
+    app.pvt.addHTML(arg);
   }
 
   return new Promise((resolve, reject) => {
@@ -342,6 +325,34 @@ app.get('/', (req, res) => {
   // Note: __dirname is the path to your current working directory. Try logging it and see what you get!
   // Mine was '/Users/zellwk/Projects/demo-repos/crud-express-mongo' for this app.
 });
+
+app.get('/event-3-json', (req, res) => {
+  // get html snippet filename
+  var htmlFilename = __dirname + '/client/html/user/event-3-form.html';
+  // read associated html snippet asynch
+  helper.fileExist({
+      file_in: htmlFilename
+    })
+    .then(helper.readFile)
+    .then((result) => {
+      // create json response object
+      var jsonRsp = {
+        htmlSnippet: result.textOut
+      };
+      // attach variable substitution
+      jsonRsp.sheetName = 'NameOfSheetInGoogleDocs';
+      // send to client
+      res.json(jsonRsp);
+    })
+    .catch((err) => {
+      res.json({
+        status: err
+      });
+    });
+});
+
+
+
 
 
 app.get('/admin', (req, res) => {
