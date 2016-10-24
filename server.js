@@ -7,8 +7,7 @@ const marked = require('marked');
 
 // 'simpleCMS/server/js' dir for own js
 const helper = require('./server/js/helper');
-
-
+const google = require('googleapis');
 // end require *****************************
 
 // application configuration **************
@@ -335,13 +334,9 @@ app.get('/event-3-json', (req, res) => {
     })
     .then(helper.readFile)
     .then((result) => {
-      // create json response object
-      var jsonRsp = {
-        htmlSnippet: result.textOut
-      };
-      // attach variable substitution
-      jsonRsp.sheetName = 'NameOfSheetInGoogleDocs';
-      // send to client
+      var jsonRsp = helper.jsonHTMLPayload(result, {
+        sheetName: 'NameOfSheetInGoogleDocs'
+      });
       res.json(jsonRsp);
     })
     .catch((err) => {

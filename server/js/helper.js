@@ -25,6 +25,15 @@ const eventStubMap = (line, arg) => {
 };
 
 
+const jsonHTMLPayload = (result, dummy) => {
+  // result.textout contains the html snippet
+  // dummy contains the substitution variables
+  var jsonRsp = {
+    htmlSnippet: result.textOut,
+    dummy: dummy
+  };
+  return jsonRsp;
+};
 
 // promises *********************************************
 // we can cascade parameters (to be used later in another promise) passed to the first promise function, by passing all parameters needed to the first paramter.
@@ -92,3 +101,4 @@ const readFile = (arg) => {
 
 module.exports.fileExist = fileExist;
 module.exports.readFile = readFile;
+module.exports.jsonHTMLPayload = jsonHTMLPayload;

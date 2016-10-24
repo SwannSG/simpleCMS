@@ -12,14 +12,18 @@ event_stub.moreInfo = (partFilename) => {
 };
 
 event_stub.book = (arg) => {
+  // request formS from server
   $.ajax({
       url: '/event-3-json',
       type: 'GET',
       contentType: 'application/json',
     })
     .done((data) => {
+      // substitute variable values into htmlSnippet
+      for (var key in data.dummy) {
+        data.htmlSnippet = data.htmlSnippet.replace('%%' + key + '%%', data.dummy[key]);
+      }
       $('#main').html(data.htmlSnippet);
-      console.log(data.htmlSnippet);
     })
     .fail((err) => {
       console.log(err);
